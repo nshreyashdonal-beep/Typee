@@ -1,4 +1,4 @@
-import { getNeighborhood } from "../data/keyNeighbors";
+import { getNeighborhood, resolveBaseKey } from "../data/keyNeighbors";
 
 // Grid cells, laid out as a real 3x3 compass: the key itself in the
 // middle, and whichever physical neighbors sit in each direction around it.
@@ -21,7 +21,10 @@ function displayLabel(label) {
 export default function KeyNeighborhood({ keyChar, wrongChar, size = "md" }) {
   const { neighbors } = getNeighborhood(keyChar);
   const byDir = Object.fromEntries(neighbors.map((n) => [n.dir, n.label]));
-  const wrongLower = wrongChar ? wrongChar.toLowerCase() : null;
+  // wrongChar may be a shifted symbol (e.g. "@") that isn't a key of its
+  // own — resolve it to the physical base label ("2") before comparing
+  // against the neighbor grid, which only ever stores base labels.
+  const wrongLower = wrongChar ? resolveBaseKey(wrongChar).toLowerCase() : null;
 
   return (
     <div className={"compass compass-" + size}>

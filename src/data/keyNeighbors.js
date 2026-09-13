@@ -53,6 +53,23 @@ export const SHIFT_SYMBOLS = {
   "[": "{", "]": "}", "\\": "|", ";": ":", "'": "\"", ",": "<", ".": ">", "/": "?",
 };
 
+// Reverse of SHIFT_SYMBOLS: given a shifted symbol someone actually typed
+// (e.g. "@" from Shift+2), resolves it back to the physical key's base
+// label ("2") so it can be found in the layout below. Without this, a
+// mistake like "pressed @ instead of *" fails to look up either character
+// — they don't exist as their own keys, they're just what "2" and "8" show
+// when shifted — so the hint silently loses its arrow and row strip (only
+// the plain sentence survives). Any character not in the reverse map (a
+// plain letter, digit, or the base symbol itself) passes through unchanged.
+const BASE_FOR_SHIFTED = Object.fromEntries(
+  Object.entries(SHIFT_SYMBOLS).map(([base, shifted]) => [shifted, base])
+);
+
+export function resolveBaseKey(char) {
+  if (!char) return char;
+  return BASE_FOR_SHIFTED[char] || char;
+}
+
 // The main typing rows, exported for reuse by the full-size keyboard
 // renderer (Guide.jsx) so its key widths/stagger match this module's
 // neighbor geometry exactly instead of drifting out of sync.
@@ -81,7 +98,8 @@ ROWS.forEach((row, rowIndex) => {
 });
 
 function entriesFor(label) {
-  return LAYOUT.filter((k) => k.label.toLowerCase() === label.toLowerCase());
+  const base = resolveBaseKey(label);
+  return LAYOUT.filter((k) => k.label.toLowerCase() === base.toLowerCase());
 }
 
 function rowMates(rowIndex) {
@@ -223,7 +241,7 @@ export function getNeighborhood(key) {
   });
 
   const neighbors = [...byDirection.entries()]
-    .filter(([, label]) => label.toLowerCase() !== key.toLowerCase())
+    .filter(([, label]) => label.toLowerCase() !== resolveBaseKey(key).toLowerCase())
     .map(([dir, label]) => ({ dir, label }));
 
   return { center: key, neighbors };

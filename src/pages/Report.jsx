@@ -1,5 +1,3 @@
-import KeyNeighborhood from "../components/KeyNeighborhood";
-
 // Shows the results of the last session: wpm/accuracy/time, the technique
 // insight panel (rollover, consistency, tough pairs, and why), and weak keys.
 export default function Report({ result, helpMode = "finger", onPracticeAgain, onBackHome }) {
@@ -94,7 +92,6 @@ export default function Report({ result, helpMode = "finger", onPracticeAgain, o
                 <div className="weak-count">
                   {count} miss{count > 1 ? "es" : ""}
                 </div>
-                {helpMode === "compass" && <KeyNeighborhood keyChar={key} size="sm" />}
               </div>
             );
           })

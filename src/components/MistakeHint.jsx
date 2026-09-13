@@ -3,6 +3,7 @@ import {
   relativeDirection,
   getKeyRow,
   getRowKeys,
+  resolveBaseKey,
   DIRECTION_ARROWS,
 } from "../data/keyNeighbors";
 import { fingerFor } from "../data/fingerMap";
@@ -88,8 +89,12 @@ export default function MistakeHint({ mode, expectedChar, wrongChar, userMap, id
             <div className="mistake-hint-strip" key={rowIndex}>
               {getRowKeys(rowIndex).map((label) => {
                 const lower = label.toLowerCase();
-                const isWrong = lower === wrongChar.toLowerCase();
-                const isCorrect = lower === expectedChar.toLowerCase();
+                // wrongChar/expectedChar might be a shifted symbol (e.g. "@")
+                // that isn't a key of its own — it's what "2" shows when
+                // shifted — so resolve back to the physical base label
+                // before comparing against the row's key labels.
+                const isWrong = lower === resolveBaseKey(wrongChar).toLowerCase();
+                const isCorrect = lower === resolveBaseKey(expectedChar).toLowerCase();
                 return (
                   <div
                     key={label}
